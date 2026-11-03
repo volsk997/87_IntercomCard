@@ -1,18 +1,13 @@
 type: custom:bubble-card
 card_type: pop-up
-hash: "#domofon"
-margin_top_mobile: auto
-margin_top_desktop: auto
+hash: '#domofon'
 show_header: false
-close_by_clicking_outside: false
-backdrop_blur: "5"
-bg_blur: "100"
-bg_opacity: "50"
+close_by_clicking_outside: true
 button_type: name
 styles: |
   #root {
     border: 1px solid rgba(var(--rgb-primary-text-color),0.1);
-    background: rgba(255, 255, 255, 0.1);
+    
     }
 sub_button:
   main: []
@@ -30,6 +25,21 @@ cards:
           action: none
         icon: mdi:dialpad
       - type: spacer
+      - type: template
+        entity: sensor.domofon_sostoianie_linii
+        double_tap_action:
+          action: none
+        tap_action:
+          action: more-info
+        hold_action:
+          action: none
+        icon: mdi:information
+        card_mod:
+          style:
+            .: |
+              {% set hover = 'true' %}
+              {% set stating = 'false' %}
+              {% include 'chip_settings_style.jinja' %}
       - type: back
         card_mod:
           style:
@@ -39,7 +49,7 @@ cards:
               {% include 'chip_settings_style.jinja' %}
     card_mod:
       style:
-        mushroom-back-chip:nth-child(3)$: |
+        mushroom-back-chip:last-child$: |
           ha-state-icon {
             --card-mod-icon: mdi:close;
           }
@@ -48,70 +58,97 @@ cards:
     grid_options:
       columns: 12
       rows: auto
-  - type: custom:mushroom-chips-card
-    chips:
-      - type: template
-        entity: button.domofon_propustit
-        tap_action:
-          action: toggle
-        hold_action:
-          action: none
-        double_tap_action:
-          action: none
-        icon: mdi:lock-open-variant
-        icon_color: |2-
-            {% if is_state(entity, 'on')%} white
-            {% else %} disabled
-            {% endif %}
-        card_mod:
-          style:
-            .: |
-              {% set scale = '1' %}
-              {% set hover = 'true' %}
-              {% set stating = 'true' %}
-              {% set state_on = 'on' %}
-              {% set color = 'rgba(120,120,120,0.2)' %}
-              {% set hover_color_off = 'rgba(120,120,120,0.3) !important' %}
-              {% include 'chip_settings_style.jinja' %}
-    alignment: center
-    card_mod:
-      style:
-        .: |
-          ha-card {
-             --chip-background: none !important;
-             --chip-border-radius: 1000px;
-             zoom: 6;
-             #--chip-height: 200px;
-             --chip-spacing: {{chip_spacing|default(0)}}px;
-             margin: 2px;
-             }
   - type: custom:horizontal-stack-in-card
     cards:
       - type: conditional
         conditions:
           - condition: state
-            entity: binary_sensor.domofon_vkhodiashchii_zvonok
-            state: "on"
+            entity_id: binary_sensor.domofon_vkhodiashchii_zvonok
+            state:
+              - 'off'
         card:
           type: custom:mushroom-template-card
-          features_position: bottom
-          entity: button.domofon_otkazat
-          grid_options:
-            columns: 12
-            rows: auto
-          color: white
+          entity: button.domofon_propustit
           tap_action:
-            action: more-info
-          icon: mdi:close
+            action: none
+          hold_action:
+            action: none
+          double_tap_action:
+            action: none
+          icon: mdi:sleep
+          color: white
+          features_position: bottom
           vertical: true
           icon_tap_action:
             action: none
           card_mod:
             style: |
               ha-card {
-                zoom: 1.5;
-                background: none;
+                background: rgba(0,0,0,0.5) !important;
+                zoom: 2;
               }
+      - type: conditional
+        conditions:
+          - condition: state
+            entity_id: binary_sensor.domofon_vkhodiashchii_zvonok
+            state:
+              - 'on'
+        card:
+          type: custom:mushroom-template-card
+          entity: button.domofon_propustit
+          tap_action:
+            action: toggle
+          hold_action:
+            action: none
+          double_tap_action:
+            action: none
+          icon: mdi:check
+          color: green
+          features_position: bottom
+          vertical: true
+          icon_tap_action:
+            action: none
+          card_mod:
+            style: |
+              ha-card {
+                background: none !important;
+                zoom: 2;
+              }
+      - type: conditional
+        conditions:
+          - condition: state
+            entity_id: binary_sensor.domofon_vkhodiashchii_zvonok
+            state:
+              - 'on'
+        card:
+          type: custom:mushroom-template-card
+          entity: button.domofon_otkazat
+          tap_action:
+            action: toggle
+          hold_action:
+            action: none
+          double_tap_action:
+            action: none
+          icon: mdi:close
+          color: red
+          features_position: bottom
+          vertical: true
+          icon_tap_action:
+            action: none
+          card_mod:
+            style: |
+              ha-card {
+                background: none !important;
+                zoom: 2;
+              }
+    card_mod:
+      style: |
+        ha-card {
+          background: none !important;
+
+        }
+  - type: custom:horizontal-stack-in-card
+    cards:
       - type: custom:mushroom-template-card
         features_position: bottom
         entity: switch.domofon_otkryvat_vsegda
@@ -119,12 +156,12 @@ cards:
           columns: 12
           rows: auto
         color: |-
-          {% if is_state(config.entity, 'on')%} white
+          {% if is_state(config.entity, 'on')%}  white
           {% else %} disabled
           {% endif %}
         tap_action:
           action: toggle
-        icon: "{{states[config.entity].attributes.icon}}"
+        icon: '{{states[config.entity].attributes.icon}}'
         vertical: true
         icon_tap_action:
           action: none
@@ -132,7 +169,7 @@ cards:
           style: |
             ha-card {
               zoom: 1.5;
-              background: none;
+              background: none !important;
             }
       - type: custom:mushroom-template-card
         features_position: bottom
@@ -141,12 +178,12 @@ cards:
           columns: 12
           rows: auto
         color: |-
-          {% if is_state(config.entity, 'on')%} white
+          {% if is_state(config.entity, 'on')%}  white
           {% else %} disabled
           {% endif %}
         tap_action:
           action: toggle
-        icon: "{{states[config.entity].attributes.icon}}"
+        icon: '{{states[config.entity].attributes.icon}}'
         vertical: true
         icon_tap_action:
           action: none
@@ -154,7 +191,7 @@ cards:
           style: |
             ha-card {
               zoom: 1.5;
-              background: none;
+              background: none !important;
             }
       - type: custom:mushroom-template-card
         features_position: bottom
@@ -166,7 +203,7 @@ cards:
         tap_action:
           action: toggle
         icon: >-
-          {% if is_state('switch.domofon_otkliuchit_trubku_domofona','on')%}
+          {% if is_state('switch.domofon_otkliuchit_trubku_domofona','on')%} 
           ion:volume-mute {% else %} ion:volume-high {% endif %}
         vertical: true
         icon_tap_action:
@@ -175,7 +212,7 @@ cards:
           style: |
             ha-card {
               zoom: 1.5;
-              background: none;
+              background: none !important;
             }
       - type: custom:mushroom-template-card
         features_position: bottom
@@ -184,12 +221,12 @@ cards:
           columns: 12
           rows: auto
         color: |-
-          {% if is_state(config.entity, 'on')%} white
+          {% if is_state(config.entity, 'on')%}  white
           {% else %} disabled
           {% endif %}
         tap_action:
           action: toggle
-        icon: "{{states[config.entity].attributes.icon}}"
+        icon: '{{states[config.entity].attributes.icon}}'
         vertical: true
         icon_tap_action:
           action: none
@@ -197,13 +234,13 @@ cards:
           style: |
             ha-card {
               zoom: 1.5;
-              background: none;
+              background: none !important;
             }
     card_mod:
       style: |
         ha-card {
          background: none !important;
         }
-popup_mode: default
+popup_mode: fit-content
 card_layout: large
-slide_to_close_distance: "500"
+slide_to_close_distance: '500'
